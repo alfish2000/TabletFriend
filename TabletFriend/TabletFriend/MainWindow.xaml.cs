@@ -31,7 +31,10 @@ namespace TabletFriend
 		
 		protected override void OnClosed(EventArgs e)
 		{
-			AppState.CurrentLayout.Dispose();
+			if (AppState.CurrentLayout != null)
+			{
+				AppState.CurrentLayout.Dispose();
+			}
 		}
 
 		private void OnMouseDown(object sender, MouseButtonEventArgs e)

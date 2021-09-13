@@ -28,6 +28,11 @@ namespace TabletFriend
 
 			_tray = new TrayManager();
 		}
+		
+		protected override void OnClosed(EventArgs e)
+		{
+			AppState.CurrentLayout.Dispose();
+		}
 
 		private void OnMouseDown(object sender, MouseButtonEventArgs e)
 		{

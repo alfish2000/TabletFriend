@@ -43,3 +43,11 @@ buttons:
 		action: toggle LShift
 		text: Shift
 		size: 2,1
+	undo:
+		action: Control+Z
+		text: Undo
+		size: 1,1
+	redo:
+		action: Control+Y
+		text: Redo
+		size: 1,1

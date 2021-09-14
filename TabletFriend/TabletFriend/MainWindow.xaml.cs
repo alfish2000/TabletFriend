@@ -12,21 +12,41 @@ namespace TabletFriend
 	public partial class MainWindow : Window
 	{
 		private LayoutManager _layout;
+		private LayoutListManager _layoutList;
 		private TrayManager _tray;
 		private FileManager _file;
 
 		public MainWindow()
 		{
+
 			Topmost = true;
 			InitializeComponent();
 			MouseDown += OnMouseDown;
-		
+
 			_file = new FileManager();
 
 			_layout = new LayoutManager(Stacke, this);
 			_layout.LoadLayout(AppState.Layouts[0]);
+			_layoutList = new LayoutListManager();
+			ContextMenu = new System.Windows.Controls.ContextMenu();
 
-			_tray = new TrayManager();
+			OnUpdateLayoutList();
+
+			_tray = new TrayManager(_layoutList);
+
+			EventBeacon.Subscribe("toggle_minimize", OnToggleMinimize);
+			EventBeacon.Subscribe("update_layout_list", OnUpdateLayoutList);
+			EventBeacon.Subscribe("change_layout", OnUpdateLayoutList);
+		}
+
+		private void OnUpdateLayoutList(object[] obj = null)
+		{
+			ContextMenu.Items.Clear();
+			var items = _layoutList.CloneMenu();
+			foreach (var item in items)
+			{
+				ContextMenu.Items.Add(item);
+			}
 		}
 		
 		protected override void OnClosed(EventArgs e)
@@ -45,6 +65,7 @@ namespace TabletFriend
 			}
 		}
 
+
 		protected override void OnSourceInitialized(EventArgs e)
 		{
 			base.OnSourceInitialized(e);
@@ -56,7 +77,23 @@ namespace TabletFriend
 				GWL_EXSTYLE,
 				GetWindowLong(helper.Handle, GWL_EXSTYLE) | WS_EX_NOACTIVATE
 			);
+		}
 
+
+		private void OnToggleMinimize(object[] obj)
+		{
+			// Regular minimize doesn't work without the taaskbar icon.
+			// The window just derps out and stays at the bottom left corner.
+			// There are workarounds, btu they make an icon flash in the taskbar
+			// for a split second. This is the best solution I found.
+			if (Visibility == Visibility.Collapsed)
+			{
+				Visibility = Visibility.Visible;
+			}
+			else
+			{
+				Visibility = Visibility.Collapsed;
+			}
 		}
 
 

@@ -1,54 +1,37 @@
 ﻿using Hardcodet.Wpf.TaskbarNotification;
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace TabletFriend
 {
 	public class TrayManager
 	{
+		private class TrayCommand : ICommand
+		{
+			// Why do we need an entire class instead of an event handler? No fucking idea.
+			public event EventHandler CanExecuteChanged;
+			public bool CanExecute(object parameter) => true;
+			public void Execute(object parameter) => EventBeacon.SendEvent("toggle_minimize");
+		}
+
+
 		private TaskbarIcon _icon;
 
-		private MenuItem _layoutsMenu;
-
-		public TrayManager()
+		public TrayManager(LayoutListManager layoutList)
 		{
-			EventBeacon.Subscribe("update_layout_list", OnUpdateLayoutList);
 			_icon = new TaskbarIcon();
 			_icon.Visibility = Visibility.Visible;
-
 			_icon.ContextMenu = new ContextMenu();
-			_layoutsMenu = AddMenuItem("layouts");
-			OnUpdateLayoutList();
+			_icon.LeftClickCommand = new TrayCommand();
 
+			_icon.ContextMenu.Items.Add(layoutList.Menu);
 			AddMenuItem("open layouts directory...", OnOpenLayoutsDirectory);
 			AddMenuItem("quit", OnQuit);
 		}
 
-
-		private void OnUpdateLayoutList(object[] obj = null)
-		{
-			Application.Current.Dispatcher.Invoke(
-				delegate
-				{
-					_layoutsMenu.Items.Clear();
-					foreach (var layout in AppState.Layouts)
-					{
-						_layoutsMenu.Items.Add(
-							new MenuItem()
-							{
-								Header = Path.GetFileNameWithoutExtension(layout),
-								DataContext = layout,
-								IsCheckable = true,
-								IsChecked = layout == AppState.CurrentLayoutPath
-							}
-						);
-					}
-				}
-			);
-		}
 
 		private MenuItem AddMenuItem(string header, RoutedEventHandler click = null)
 		{
@@ -74,7 +57,7 @@ namespace TabletFriend
 
 
 		private void OnQuit(object sender, RoutedEventArgs e) =>
-			Application.Current.Shutdown();
+			Environment.Exit(0);
 
 	}
 }

@@ -43,8 +43,10 @@ buttons:
 		action: Control+V
 		text: Paste
 		size: 2,1
-	spacer2:
-		spacer: true
+	click:
+		action: click 0,0
+		text: Click
+		size: 1,1
 	cut:
 		action: Control+X
 		text: Cut
